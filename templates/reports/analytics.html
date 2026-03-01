@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - InsightEdge{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <h1 style="margin-bottom: 2rem; font-size: 2rem; font-weight: 700;">Analytics Dashboard</h1>
+
+        <!-- Key Metrics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value">{{ total_students }}</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-icon primary">📊</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value">{{ at_risk_students }}</div>
+                        <div class="stat-label">At-Risk Students</div>
+                    </div>
+                    <div class="stat-icon warning">⚠️</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value">{{ avg_gpa }}</div>
+                        <div class="stat-label">Average GPA</div>
+                    </div>
+                    <div class="stat-icon success">📈</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value">{{ avg_risk_score }}</div>
+                        <div class="stat-label">Average Risk Score</div>
+                    </div>
+                    <div class="stat-icon info">🎯</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-2">
+            <!-- Reports by Risk Level -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Reports by Risk Level</h2>
+                </div>
+                <div class="card-body">
+                    {% for item in reports_by_level %}
+                    <div style="margin-bottom: 1.5rem;">
+                        <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+                            <span style="font-weight: 600; text-transform: capitalize;">{{ item.risk_level }}</span>
+                            <span style="font-weight: 700; font-size: 1.125rem;">{{ item.count }}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar {% if item.risk_level == 'critical' %}danger{% elif item.risk_level == 'high' %}danger{% elif item.risk_level == 'medium' %}warning{% else %}success{% endif %}" style="width: {{ item.count|floatformat:0 }}%;"></div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; padding: 2rem; color: var(--gray);">No data available</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Reports by Status -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Reports by Status</h2>
+                </div>
+                <div class="card-body">
+                    {% for item in reports_by_status %}
+                    <div style="margin-bottom: 1.5rem;">
+                        <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+                            <span style="font-weight: 600; text-transform: capitalize;">{{ item.status|replace:"_":" " }}</span>
+                            <span style="font-weight: 700; font-size: 1.125rem;">{{ item.count }}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar {% if item.status == 'resolved' %}success{% elif item.status == 'pending' %}warning{% else %}info{% endif %}" style="width: {{ item.count|floatformat:0 }}%;"></div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; padding: 2rem; color: var(--gray);">No data available</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Interventions by Type -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Interventions by Type</h2>
+                </div>
+                <div class="card-body">
+                    {% for item in interventions_by_type %}
+                    <div style="padding: 0.75rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                        <span style="text-transform: capitalize;">{{ item.intervention_type|replace:"_":" " }}</span>
+                        <span class="badge primary" style="font-size: 1rem;">{{ item.count }}</span>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; padding: 2rem; color: var(--gray);">No interventions recorded</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Interventions by Status -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Intervention Status</h2>
+                </div>
+                <div class="card-body">
+                    {% for item in interventions_by_status %}
+                    <div style="margin-bottom: 1.5rem;">
+                        <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+                            <span style="font-weight: 600; text-transform: capitalize;">{{ item.status|replace:"_":" " }}</span>
+                            <span style="font-weight: 700; font-size: 1.125rem;">{{ item.count }}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar {% if item.status == 'completed' %}success{% elif item.status == 'scheduled' %}info{% elif item.status == 'cancelled' %}danger{% else %}warning{% endif %}" style="width: {{ item.count|floatformat:0 }}%;"></div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; padding: 2rem; color: var(--gray);">No data available</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- System Performance -->
+        <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+                <h2 class="card-title">System Performance Overview</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Analytics Period:</strong> Last 30 days<br>
+                    <strong>Data Quality:</strong> All risk assessments are AI-powered and continuously updated<br>
+                    <strong>Collaboration:</strong> Real-time collaboration between professors and counselors
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

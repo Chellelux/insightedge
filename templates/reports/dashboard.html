@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - InsightEdge{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <h1 style="margin-bottom: 2rem; font-size: 2rem; font-weight: 700;">Dashboard Overview</h1>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value">{{ total_students }}</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-icon primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value">{{ at_risk_students }}</div>
+                        <div class="stat-label">At-Risk Students</div>
+                    </div>
+                    <div class="stat-icon warning">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value">{{ high_risk_students }}</div>
+                        <div class="stat-label">High Risk</div>
+                    </div>
+                    <div class="stat-icon danger">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value">{{ critical_risk_students }}</div>
+                        <div class="stat-label">Critical Alert</div>
+                    </div>
+                    <div class="stat-icon critical">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions and Recent Reports -->
+        <div class="grid grid-2">
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <a href="{% url 'reports:student_list' %}?risk=high" class="btn btn-danger" style="text-align: center;">
+                            View High-Risk Students
+                        </a>
+                        <a href="{% url 'reports:report_list' %}?status=pending" class="btn btn-warning" style="text-align: center;">
+                            Pending Reports ({{ pending_reports }})
+                        </a>
+                        <a href="#" class="btn btn-primary" style="text-align: center;">
+                            Generate New Report
+                        </a>
+                        <a href="{% url 'reports:analytics' %}" class="btn btn-outline" style="text-align: center;">
+                            View Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Alerts -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Risk Alerts</h2>
+                    <a href="{% url 'reports:report_list' %}" style="color: var(--primary-color); text-decoration: none; font-size: 0.875rem;">View All</a>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        {% for report in recent_reports %}
+                        <div style="padding: 1rem; border-bottom: 1px solid var(--border);">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div style="font-weight: 600; margin-bottom: 0.25rem;">
+                                        {{ report.student.get_full_name }}
+                                    </div>
+                                    <div style="color: var(--gray); font-size: 0.875rem;">
+                                        {{ report.student.student_id }} • {{ report.student.major }}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span class="badge {% if report.risk_level == 'critical' %}critical{% elif report.risk_level == 'high' %}danger{% elif report.risk_level == 'medium' %}warning{% else %}info{% endif %}">
+                                        {{ report.risk_level }}
+                                    </span>
+                                    <span class="badge primary">{{ report.status }}</span>
+                                </div>
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--gray);">
+                                Risk Score: {{ report.risk_score }} • {{ report.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div style="padding: 2rem; text-align: center; color: var(--gray);">
+                            No recent alerts
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Interventions -->
+        {% if pending_interventions > 0 %}
+        <div class="alert alert-info" style="margin-top: 1.5rem;">
+            <strong>Attention:</strong> You have {{ pending_interventions }} pending intervention(s) scheduled.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

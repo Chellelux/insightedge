@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Students - InsightEdge{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <div class="flex items-center justify-between" style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2rem; font-weight: 700;">Students</h1>
+        </div>
+
+        <!-- Filters -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-body">
+                <form method="get" class="flex gap-2" style="flex-wrap: wrap;">
+                    <input type="text" name="search" placeholder="Search students..." class="form-control" style="flex: 1; min-width: 200px;" value="{{ search }}">
+                    <select name="risk" class="form-control" style="width: 200px;">
+                        <option value="">All Risk Levels</option>
+                        <option value="low" {% if risk_filter == 'low' %}selected{% endif %}>Low Risk</option>
+                        <option value="medium" {% if risk_filter == 'medium' %}selected{% endif %}>Medium Risk</option>
+                        <option value="high" {% if risk_filter == 'high' %}selected{% endif %}>High Risk</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{% url 'reports:student_list' %}" class="btn btn-secondary">Clear</a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Students Grid -->
+        <div class="grid grid-2">
+            {% for student in students %}
+            <a href="{% url 'reports:student_detail' student.id %}" style="text-decoration: none; color: inherit;">
+                <div class="student-card">
+                    <div class="student-avatar">
+                        {{ student.first_name.0 }}{{ student.last_name.0 }}
+                    </div>
+                    <div class="student-info">
+                        <div class="student-name">{{ student.get_full_name }}</div>
+                        <div class="student-id">{{ student.student_id }} • {{ student.major }}</div>
+                        <div class="flex items-center gap-2" style="margin-top: 0.5rem;">
+                            <div class="risk-indicator">
+                                <span class="risk-dot {% if student.overall_risk_score >= 0.75 %}critical{% elif student.overall_risk_score >= 0.5 %}high{% elif student.overall_risk_score >= 0.3 %}medium{% else %}low{% endif %}"></span>
+                                <span style="font-size: 0.875rem; color: var(--gray);">
+                                    Risk: {{ student.overall_risk_score|floatformat:2 }}
+                                </span>
+                            </div>
+                            {% if student.gpa %}
+                            <span style="font-size: 0.875rem; color: var(--gray);">
+                                • GPA: {{ student.gpa }}
+                            </span>
+                            {% endif %}
+                            <span style="font-size: 0.875rem; color: var(--gray);">
+                                • Year {{ student.year_level }}
+                            </span>
+                        </div>
+                        {% if student.assigned_counselor %}
+                        <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--gray);">
+                            Counselor: {{ student.assigned_counselor.get_full_name }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="card" style="grid-column: 1 / -1;">
+                <div class="card-body" style="text-align: center; padding: 3rem; color: var(--gray);">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 1rem;">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <p>No students found matching your criteria.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

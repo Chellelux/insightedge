@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ student.get_full_name }} - InsightEdge{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <!-- Student Header -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-body">
+                <div class="flex gap-2" style="align-items: flex-start;">
+                    <div class="student-avatar" style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ student.first_name.0 }}{{ student.last_name.0 }}
+                    </div>
+                    <div style="flex: 1;">
+                        <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">
+                            {{ student.get_full_name }}
+                        </h1>
+                        <div class="flex items-center gap-2" style="flex-wrap: wrap; margin-bottom: 1rem;">
+                            <span class="badge primary">{{ student.student_id }}</span>
+                            <span class="badge info">Year {{ student.year_level }}</span>
+                            <span class="badge {% if student.overall_risk_score >= 0.75 %}critical{% elif student.overall_risk_score >= 0.5 %}danger{% elif student.overall_risk_score >= 0.3 %}warning{% else %}success{% endif %}">
+                                Risk Score: {{ student.overall_risk_score|floatformat:2 }}
+                            </span>
+                        </div>
+                        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div>
+                                <div style="color: var(--gray); font-size: 0.875rem;">Major</div>
+                                <div style="font-weight: 600;">{{ student.major }}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--gray); font-size: 0.875rem;">GPA</div>
+                                <div style="font-weight: 600;">{{ student.gpa|default:"N/A" }}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--gray); font-size: 0.875rem;">Email</div>
+                                <div style="font-weight: 600;">{{ student.email }}</div>
+                            </div>
+                            {% if student.assigned_counselor %}
+                            <div>
+                                <div style="color: var(--gray); font-size: 0.875rem;">Assigned Counselor</div>
+                                <div style="font-weight: 600;">{{ student.assigned_counselor.get_full_name }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary">Generate Risk Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-2">
+            <!-- Course Enrollments -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Current Courses</h2>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    {% for enrollment in enrollments %}
+                    <div style="padding: 1rem; border-bottom: 1px solid var(--border);">
+                        <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+                            <div style="font-weight: 600;">{{ enrollment.course_name }}</div>
+                            <span class="badge {% if enrollment.current_grade in 'AB' %}success{% elif enrollment.current_grade == 'C' %}warning{% elif enrollment.current_grade in 'DF' %}danger{% else %}info{% endif %}">
+                                {{ enrollment.current_grade }}
+                            </span>
+                        </div>
+                        <div style="color: var(--gray); font-size: 0.875rem; margin-bottom: 0.5rem;">
+                            {{ enrollment.course_code }} • {{ enrollment.professor.get_full_name }}
+                        </div>
+                        <div style="display: flex; gap: 1rem; font-size: 0.875rem;">
+                            <div>
+                                <span style="color: var(--gray);">Attendance:</span>
+                                <strong>{{ enrollment.attendance_rate|floatformat:0 }}%</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--gray);">Completion:</span>
+                                <strong>{{ enrollment.completion_rate|floatformat:0 }}%</strong>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="padding: 2rem; text-align: center; color: var(--gray);">
+                        No current enrollments
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Risk Reports History -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Risk Assessment History</h2>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    {% for report in reports %}
+                    <a href="{% url 'reports:report_detail' report.id %}" style="display: block; padding: 1rem; border-bottom: 1px solid var(--border); text-decoration: none; color: inherit; transition: background 0.2s;">
+                        <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+                            <span class="badge {% if report.risk_level == 'critical' %}critical{% elif report.risk_level == 'high' %}danger{% elif report.risk_level == 'medium' %}warning{% else %}info{% endif %}">
+                                {{ report.risk_level }}
+                            </span>
+                            <span style="font-size: 0.875rem; color: var(--gray);">
+                                {{ report.created_at|date:"M d, Y" }}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.875rem; color: var(--gray); margin-bottom: 0.5rem;">
+                            Risk Score: {{ report.risk_score|floatformat:2 }}
+                        </div>
+                        <div style="font-size: 0.875rem;">
+                            {{ report.ai_summary|truncatewords:20 }}
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div style="padding: 2rem; text-align: center; color: var(--gray);">
+                        No risk reports available
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Interventions -->
+        {% if interventions %}
+        <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+                <h2 class="card-title">Interventions</h2>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Title</th>
+                                <th>Conducted By</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for intervention in interventions %}
+                            <tr>
+                                <td>{{ intervention.get_intervention_type_display }}</td>
+                                <td>{{ intervention.title }}</td>
+                                <td>{{ intervention.conducted_by.get_full_name }}</td>
+                                <td>{{ intervention.scheduled_date|date:"M d, Y" }}</td>
+                                <td>
+                                    <span class="badge {% if intervention.status == 'completed' %}success{% elif intervention.status == 'cancelled' %}danger{% else %}info{% endif %}">
+                                        {{ intervention.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
