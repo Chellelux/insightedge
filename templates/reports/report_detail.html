@@ -5,35 +5,59 @@
 {% block content %}
 <div class="dashboard">
     <div class="container">
+
         <!-- Report Header -->
         <div class="card" style="margin-bottom: 1.5rem;">
             <div class="card-body">
+
                 <div class="flex items-center justify-between" style="margin-bottom: 1rem;">
                     <h1 style="font-size: 2rem; font-weight: 700;">Risk Assessment Report</h1>
+
                     <div class="flex gap-1">
-                        <span class="badge {% if report.risk_level == 'critical' %}critical{% elif report.risk_level == 'high' %}danger{% elif report.risk_level == 'medium' %}warning{% else %}info{% endif %}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                        <span class="badge 
+                            {% if report.risk_level == 'critical' %}critical
+                            {% elif report.risk_level == 'high' %}danger
+                            {% elif report.risk_level == 'medium' %}warning
+                            {% else %}info{% endif %}"
+                            style="font-size: 1rem; padding: 0.5rem 1rem;">
                             {{ report.risk_level|upper }}
                         </span>
-                        <span class="badge {% if report.status == 'resolved' %}success{% elif report.status == 'pending' %}warning{% else %}primary{% endif %}" style="font-size: 1rem; padding: 0.5rem 1rem;">
-                            {{ report.status }}
+
+                        <span class="badge 
+                            {% if report.status == 'resolved' %}success
+                            {% elif report.status == 'pending' %}warning
+                            {% else %}primary{% endif %}"
+                            style="font-size: 1rem; padding: 0.5rem 1rem;">
+                            {{ report.status|title }}
                         </span>
                     </div>
                 </div>
 
+                <!-- Report Info -->
                 <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+
                     <div>
                         <div style="color: var(--gray); font-size: 0.875rem;">Student</div>
                         <div style="font-weight: 600;">{{ report.student.get_full_name }}</div>
-                        <div style="font-size: 0.875rem; color: var(--gray);">{{ report.student.student_id }}</div>
+                        <div style="font-size: 0.875rem; color: var(--gray);">
+                            {{ report.student.student_id }}
+                        </div>
                     </div>
+
                     <div>
                         <div style="color: var(--gray); font-size: 0.875rem;">Overall Risk Score</div>
-                        <div style="font-size: 1.5rem; font-weight: 700;">{{ report.risk_score|floatformat:2 }}</div>
+                        <div style="font-size: 1.5rem; font-weight: 700;">
+                            {{ report.risk_score|floatformat:2 }}
+                        </div>
                     </div>
+
                     <div>
                         <div style="color: var(--gray); font-size: 0.875rem;">Created</div>
-                        <div style="font-weight: 600;">{{ report.created_at|date:"M d, Y H:i" }}</div>
+                        <div style="font-weight: 600;">
+                            {{ report.created_at|date:"M d, Y H:i" }}
+                        </div>
                     </div>
+
                     <div>
                         <div style="color: var(--gray); font-size: 0.875rem;">Assigned To</div>
                         <div style="font-weight: 600;">
@@ -49,63 +73,56 @@
                 <!-- Risk Breakdown -->
                 <div style="background: var(--light); padding: 1rem; border-radius: 8px;">
                     <div style="font-weight: 600; margin-bottom: 1rem;">Risk Factor Breakdown</div>
+
                     <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+
+                        {% for label, value in [
+                            ('Academic Risk', report.academic_risk),
+                            ('Attendance Risk', report.attendance_risk),
+                            ('Engagement Risk', report.engagement_risk),
+                            ('Behavioral Risk', report.behavioral_risk)
+                        ] %}
+
                         <div>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="font-size: 0.875rem;">Academic Risk</span>
-                                <strong>{{ report.academic_risk|floatformat:2 }}</strong>
+                                <span style="font-size: 0.875rem;">{{ label }}</span>
+                                <strong>{{ value|floatformat:2 }}</strong>
                             </div>
+
                             <div class="progress">
-                                <div class="progress-bar {% if report.academic_risk >= 0.7 %}danger{% elif report.academic_risk >= 0.4 %}warning{% else %}success{% endif %}" style="width: {{ report.academic_risk|floatformat:0|add:'00' }}%;"></div>
+                                <div class="progress-bar 
+                                    {% if value >= 0.7 %}danger
+                                    {% elif value >= 0.4 %}warning
+                                    {% else %}success{% endif %}"
+                                    style="width: {{ value|floatformat:2|floatformat }}%;">
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="font-size: 0.875rem;">Attendance Risk</span>
-                                <strong>{{ report.attendance_risk|floatformat:2 }}</strong>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar {% if report.attendance_risk >= 0.7 %}danger{% elif report.attendance_risk >= 0.4 %}warning{% else %}success{% endif %}" style="width: {{ report.attendance_risk|floatformat:0|add:'00' }}%;"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="font-size: 0.875rem;">Engagement Risk</span>
-                                <strong>{{ report.engagement_risk|floatformat:2 }}</strong>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar {% if report.engagement_risk >= 0.7 %}danger{% elif report.engagement_risk >= 0.4 %}warning{% else %}success{% endif %}" style="width: {{ report.engagement_risk|floatformat:0|add:'00' }}%;"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="font-size: 0.875rem;">Behavioral Risk</span>
-                                <strong>{{ report.behavioral_risk|floatformat:2 }}</strong>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar {% if report.behavioral_risk >= 0.7 %}danger{% elif report.behavioral_risk >= 0.4 %}warning{% else %}success{% endif %}" style="width: {{ report.behavioral_risk|floatformat:0|add:'00' }}%;"></div>
-                            </div>
-                        </div>
+
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- AI + Interventions -->
         <div class="grid grid-2">
+
             <!-- AI Analysis -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">AI Analysis</h2>
                 </div>
-                <div class="card-body">
-                    <div style="margin-bottom: 1.5rem;">
-                        <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Summary</h3>
-                        <p style="color: var(--gray); line-height: 1.6;">{{ report.ai_summary }}</p>
-                    </div>
 
-                    <div>
-                        <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Recommendations</h3>
-                        <div style="color: var(--gray); line-height: 1.8; white-space: pre-line;">{{ report.ai_recommendations }}</div>
+                <div class="card-body">
+                    <h3 style="font-weight: 600;">Summary</h3>
+                    <p style="color: var(--gray); line-height: 1.6;">
+                        {{ report.ai_summary|default:"No AI summary available." }}
+                    </p>
+
+                    <h3 style="font-weight: 600; margin-top: 1rem;">Recommendations</h3>
+                    <div style="color: var(--gray); line-height: 1.8; white-space: pre-line;">
+                        {{ report.ai_recommendations|default:"No recommendations available." }}
                     </div>
                 </div>
             </div>
@@ -114,27 +131,36 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Interventions</h2>
-                    <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Schedule Intervention</button>
                 </div>
+
                 <div class="card-body" style="padding: 0;">
                     {% for intervention in interventions %}
                     <div style="padding: 1rem; border-bottom: 1px solid var(--border);">
-                        <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
-                            <div style="font-weight: 600;">{{ intervention.title }}</div>
-                            <span class="badge {% if intervention.status == 'completed' %}success{% elif intervention.status == 'cancelled' %}danger{% else %}info{% endif %}">
-                                {{ intervention.status }}
+
+                        <div class="flex items-center justify-between">
+                            <strong>{{ intervention.title }}</strong>
+                            <span class="badge 
+                                {% if intervention.status == 'completed' %}success
+                                {% elif intervention.status == 'cancelled' %}danger
+                                {% else %}info{% endif %}">
+                                {{ intervention.status|title }}
                             </span>
                         </div>
-                        <div style="font-size: 0.875rem; color: var(--gray); margin-bottom: 0.5rem;">
-                            {{ intervention.get_intervention_type_display }} • {{ intervention.scheduled_date|date:"M d, Y" }}
+
+                        <div style="font-size: 0.875rem; color: var(--gray);">
+                            {{ intervention.get_intervention_type_display }} • 
+                            {{ intervention.scheduled_date|date:"M d, Y" }}
                         </div>
+
+                        {% if intervention.conducted_by %}
                         <div style="font-size: 0.875rem; color: var(--gray);">
                             Conducted by: {{ intervention.conducted_by.get_full_name }}
                         </div>
+                        {% endif %}
                     </div>
                     {% empty %}
                     <div style="padding: 2rem; text-align: center; color: var(--gray);">
-                        No interventions scheduled yet
+                        No interventions scheduled yet.
                     </div>
                     {% endfor %}
                 </div>
@@ -146,44 +172,48 @@
             <div class="card-header">
                 <h2 class="card-title">Collaboration Notes</h2>
             </div>
+
             <div class="card-body">
+
                 {% for comment in comments %}
                 <div style="padding: 1rem; border-left: 3px solid var(--primary-color); background: var(--light); border-radius: 4px; margin-bottom: 1rem;">
-                    <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
-                        <div class="flex items-center gap-1">
-                            <div class="avatar" style="width: 32px; height: 32px; font-size: 0.875rem;">
-                                {{ comment.author.first_name.0 }}{{ comment.author.last_name.0 }}
-                            </div>
-                            <div>
-                                <div style="font-weight: 600;">{{ comment.author.get_full_name }}</div>
-                                <div style="font-size: 0.75rem; color: var(--gray);">{{ comment.author.user_type|title }}</div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <strong>{{ comment.author.get_full_name }}</strong>
+                            <div style="font-size: 0.75rem; color: var(--gray);">
+                                {{ comment.author.user_type|title }}
                             </div>
                         </div>
+
                         <div style="font-size: 0.875rem; color: var(--gray);">
                             {{ comment.created_at|date:"M d, Y H:i" }}
                         </div>
                     </div>
-                    <div style="margin-left: 48px; color: var(--dark); line-height: 1.6;">
+
+                    <div style="margin-top: 0.5rem;">
                         {{ comment.content }}
                     </div>
                 </div>
                 {% empty %}
-                <div style="padding: 2rem; text-align: center; color: var(--gray);">
-                    No comments yet. Start the collaboration!
+                <div style="text-align: center; color: var(--gray);">
+                    No comments yet.
                 </div>
                 {% endfor %}
 
                 <!-- Add Comment Form -->
-                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
-                    <form method="post">
-                        <div class="form-group">
-                            <textarea class="form-control" rows="4" placeholder="Add a comment..." style="resize: vertical;"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Post Comment</button>
-                    </form>
-                </div>
+                <form method="post" style="margin-top: 1rem;">
+                    {% csrf_token %}
+                    <textarea name="content" class="form-control" rows="4"
+                        placeholder="Add a comment..." required></textarea>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">
+                        Post Comment
+                    </button>
+                </form>
+
             </div>
         </div>
+
     </div>
 </div>
 {% endblock %}
